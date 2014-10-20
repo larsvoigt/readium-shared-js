@@ -86,7 +86,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
         // if(!spine.isValidLinearItem(firstOpenPage.spineItemIndex))
         //     return false;
 
-        return spine.first().index < this.firstOpenPage.spineItemIndex || 0 < this.firstOpenPage.spineItemPageIndex;
+        return spine.first().index < this.firstOpenPage().spineItemIndex || 0 < this.firstOpenPage().spineItemPageIndex;
     };
 
     this.firstOpenPage = function() {
@@ -113,7 +113,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
         if(!isOpen()) {
             return 0;
         }
-        return this.isFixedLayout ? spine.itemCount : this.firstOpenPage.spineItemPageCount;
+        return this.isFixedLayout ? spine.itemCount : this.firstOpenPage().spineItemPageCount;
     }
 
     var isOpen = function() {
