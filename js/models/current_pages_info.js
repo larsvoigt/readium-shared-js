@@ -39,7 +39,6 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
 
     this.isRightToLeft = spine.isRightToLeft();
     this.isFixedLayout = isFixedLayout;
-    this.spineItemCount = spine.items.length
     this.openPages = [];
 
     this.addOpenPage = function(spineItemPageIndex, spineItemPageCount, idref, spineItemIndex) {
@@ -48,11 +47,11 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
         this.sort();
     };
 
-    this.canGoLeft = function () {
+    this.canGoLeft = function() {
         return this.isRightToLeft ? this.canGoNext() : this.canGoPrev();
     };
 
-    this.canGoRight = function () {
+    this.canGoRight = function() {
         return this.isRightToLeft ? this.canGoPrev() : this.canGoNext();
     };
 
@@ -65,7 +64,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
 
         // TODO: handling of non-linear spine items ("ancillary" documents), allowing page turn within the reflowable XHTML, but preventing previous/next access to sibling spine items. Also needs "go back" feature to navigate to source hyperlink location that led to the non-linear document.
         // See https://github.com/readium/readium-shared-js/issues/26
-        
+
         // Removed, needs to be implemented properly as per above.
         // See https://github.com/readium/readium-shared-js/issues/108
         // if(!spine.isValidLinearItem(lastOpenPage.spineItemIndex))
@@ -79,19 +78,48 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
         if(this.openPages.length == 0)
             return false;
 
-        var firstOpenPage = this.openPages[0];
-
         // TODO: handling of non-linear spine items ("ancillary" documents), allowing page turn within the reflowable XHTML, but preventing previous/next access to sibling spine items. Also needs "go back" feature to navigate to source hyperlink location that led to the non-linear document.
         // See https://github.com/readium/readium-shared-js/issues/26
-        
+
         // Removed, needs to be implemented properly as per above.
         // //https://github.com/readium/readium-shared-js/issues/108
         // if(!spine.isValidLinearItem(firstOpenPage.spineItemIndex))
         //     return false;
 
-        return spine.first().index < firstOpenPage.spineItemIndex || 0 < firstOpenPage.spineItemPageIndex;
+        return spine.first().index < this.firstOpenPage.spineItemIndex || 0 < this.firstOpenPage.spineItemPageIndex;
     };
-    
+
+    this.firstOpenPage = function() {
+
+        if(this.openPages.count == 0) {
+            return undefined;
+        }
+        return this.openPages[0];
+    }
+
+    this.getPageNumbers = function() {
+
+        var res = [];
+        for(var pageInfo in this.openPages) {
+            var pageIndex = this.isFixedLayout ? this.openPages[pageInfo].spineItemIndex
+                : this.openPages[pageInfo].spineItemPageIndex;
+            res.push(pageIndex + 1);
+        }
+        return res;
+    }
+
+    this.getPageCount = function() {
+
+        if(!isOpen()) {
+            return 0;
+        }
+        return this.isFixedLayout ? spine.itemCount : this.firstOpenPage.spineItemPageCount;
+    }
+
+    var isOpen = function() {
+        return true;// this.openPages.count > 0;
+    }
+
     this.sort = function() {
 
         this.openPages.sort(function(a, b) {
@@ -101,9 +129,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
             }
 
             return a.pageIndex - b.pageIndex;
-
         });
-
     };
 
 };
