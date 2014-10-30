@@ -1,32 +1,46 @@
-
-
 ReadiumSDK.Models.Pagination = function () {
 
-    this.cacheDefaultPagination = function (openBookData, readerOptions) {
+    this.storeDefaultPagination = function (openBookData, readerOptions) {
 
-        var view = new ReaderView(readerOptions);
+        var view = new ReadiumSDK.Views.ReaderView(readerOptions);
 
         var spine = undefined;
         openBookData.openPageRequest = undefined
+
         view.openBook(openBookData, function (s) {
+            // hack to get current spine
+            // view.spine is undefined ???
+            // todo: fixed this issues
             spine = s;
         });
 
         var i = 0;
         var ready = true;
-        var count = 0;
+        var totalPageCount = 0;
+        var curPagination = [];
+
         view.on(ReadiumSDK.Events.PAGINATION_CHANGED, function (pageChangeData) {
 
             if (pageChangeData.spineItem) {
 
-                console.log("\nPAGINATION_CHANGED");
+//                console.log("\nPAGINATION_CHANGED");
                 var openPage = pageChangeData.paginationInfo.firstOpenPage();
 
                 if (openPage) {
-                    console.debug("openpageId: " + openPage.idref);
-                    console.log("page count: " + pageChangeData.paginationInfo.getPageCount());
-                    count += pageChangeData.paginationInfo.getPageCount();
-                    console.debug("book count: " + count);
+
+                    var pageCount = pageChangeData.paginationInfo.getPageCount();
+                    var idref = openPage.idref;
+
+                    curPagination.push([
+                        {idref: idref},
+                        {pageCount: pageCount}
+                    ]);
+
+//                    console.debug("openpageId: " + idref);
+//                    console.log("page Count: " + pageCount);
+
+                    totalPageCount += pageCount;
+                    console.debug("book totalPageCount: " + totalPageCount);
                 }
 
                 if (ready) {
@@ -35,7 +49,7 @@ ReadiumSDK.Models.Pagination = function () {
                     if (nextItem) {
                         ready = false;
                         var openRef = nextItem.idref;
-                        console.debug("openRef: " + openRef);
+//                        console.debug("openRef: " + openRef);
                         view.openSpineItemPage(openRef, 0, view)
                     }
                 }
@@ -45,8 +59,8 @@ ReadiumSDK.Models.Pagination = function () {
         view.on(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, function ($iframe, spineItem) {
             try {
                 if (spineItem && spineItem.idref && $iframe && $iframe[0]) {
-                    console.log("\nCONTENT_DOCUMENT_LOADED");
-                    console.debug(spineItem.href);
+//                    console.log("\nCONTENT_DOCUMENT_LOADED");
+//                    console.debug(spineItem.href);
                     ready = true;
                 }
             }
@@ -54,5 +68,10 @@ ReadiumSDK.Models.Pagination = function () {
                 console.error(err);
             }
         });
+
+        curPagination.push({totalPageCount: totalPageCount});
+
+        localStorage.removeItem('defaultPagination');
+        localStorage.setItem('defaultPagination', JSON.stringify(curPagination));
     }
 };
