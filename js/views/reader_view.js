@@ -275,14 +275,18 @@ ReadiumSDK.Views.ReaderView = function(options) {
      *
      *
      */
-    this.openBook = function(openBookData) {
+    this.openBook = function(openBookData, callback) {
 
-		var packageData = openBookData.package ? openBookData.package : openBookData;
+        var packageData = openBookData.package ? openBookData.package : openBookData;
 
         _package = new ReadiumSDK.Models.Package(packageData);
 
         _spine = _package.spine;
         _spine.handleLinear(true);
+
+        if(callback) {
+            callback(_spine);
+        }
 
         if(_mediaOverlayPlayer) {
             _mediaOverlayPlayer.reset();
@@ -355,7 +359,6 @@ ReadiumSDK.Views.ReaderView = function(options) {
             }
 
         }
-
     };
 
     function onMediaPlayerStatusChanged(status) {

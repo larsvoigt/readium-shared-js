@@ -36,6 +36,7 @@ Used to report pagination state back to the host application
 
 ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
 
+    var self = this;
 
     this.isRightToLeft = spine.isRightToLeft();
     this.isFixedLayout = isFixedLayout;
@@ -91,7 +92,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
 
     this.firstOpenPage = function() {
 
-        if(this.openPages.count == 0) {
+        if(this.openPages.length == 0) {
             return undefined;
         }
         return this.openPages[0];
@@ -103,9 +104,10 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
         for(var pageInfo in this.openPages) {
             var pageIndex = this.isFixedLayout ? this.openPages[pageInfo].spineItemIndex
                 : this.openPages[pageInfo].spineItemPageIndex;
+
             res.push(pageIndex + 1);
         }
-        return res;
+        return res.join("-");
     }
 
     this.getPageCount = function() {
@@ -113,11 +115,11 @@ ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
         if(!isOpen()) {
             return 0;
         }
-        return this.isFixedLayout ? spine.itemCount : this.firstOpenPage().spineItemPageCount;
+        return this.isFixedLayout ? spine.items.length : this.firstOpenPage().spineItemPageCount;
     }
 
-    var isOpen = function() {
-        return true;// this.openPages.count > 0;
+    function isOpen() {
+        return self.openPages.length > 0;
     }
 
     this.sort = function() {
