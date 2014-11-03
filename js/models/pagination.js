@@ -1,80 +1,86 @@
 ReadiumSDK.Models.Pagination = function () {
 
+    var _view = undefined;
+    var _spine = undefined;
+    var _contentLoaded = true;
+    var _totalPageCount = 0;
+    var _curPagination = [];
+
     this.storeDefaultPagination = function (openBookData, readerOptions) {
 
+        // Todo: proof book was open don delete defaultPagination
         localStorage.clear();
         localStorage.removeItem('defaultPagination');
-        
-        var view = new ReadiumSDK.Views.ReaderView(readerOptions);
 
-        var spine = undefined;
+        _view = new ReadiumSDK.Views.ReaderView(readerOptions);
+
         openBookData.openPageRequest = undefined
 
-        view.openBook(openBookData, function (s) {
+        _view.openBook(openBookData, function (s) {
             // hack to get current spine
             // view.spine is undefined ???
             // todo: fixed this issues
-            spine = s;
+            _spine = s;
         });
 
-        var i = 0;
-        var ready = true;
-        var totalPageCount = 0;
-        var curPagination = [];
+        _view.on(ReadiumSDK.Events.PAGINATION_CHANGED, paginationChangedHandler);
+        _view.on(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, contentLoadedHandler);
+    }
 
-        view.on(ReadiumSDK.Events.PAGINATION_CHANGED, function (pageChangeData) {
+    function paginationChangedHandler(pageChangeData) {
 
-            if (pageChangeData.spineItem) {
+        if (pageChangeData.spineItem) {
 
 //                console.log("\nPAGINATION_CHANGED");
-                var openPage = pageChangeData.paginationInfo.firstOpenPage();
+            var openPage = pageChangeData.paginationInfo.firstOpenPage();
 
-                if (openPage) {
+            if (openPage) {
 
-                    var pageCount = pageChangeData.paginationInfo.getPageCount();
-                    var idref = openPage.idref;
+                var pageCount = pageChangeData.paginationInfo.getPageCount();
+                var idref = openPage.idref;
 
-                    curPagination.push([
-                        {idref: idref},
-                        {pageCount: pageCount}
-                    ]);
+                _curPagination.push({
+                    idref: idref,
+                    pageCount: pageCount
+                });
 
 //                    console.debug("openpageId: " + idref);
 //                    console.log("page Count: " + pageCount);
 
-                    totalPageCount += pageCount;
-                    console.debug("book totalPageCount: " + totalPageCount);
-                }
+                _totalPageCount += pageCount;
+//                    console.debug("book totalPageCount: " + totalPageCount);
+            }
 
-                if (ready) {
+            if (_contentLoaded) {
 
-                    var nextItem = spine.nextItem(pageChangeData.spineItem);
-                    if (nextItem) {
-                        ready = false;
-                        var openRef = nextItem.idref;
+                var nextItem = _spine.nextItem(pageChangeData.spineItem);
+                if (nextItem) {
+                    _contentLoaded = false;
+                    var openRef = nextItem.idref;
 //                        console.debug("openRef: " + openRef);
-                        view.openSpineItemPage(openRef, 0, view)
-                    }
+                    _view.openSpineItemPage(openRef, 0, _view)
+                } else {
+                    _curPagination.push({totalPageCount: _totalPageCount});
+                    localStorage.setItem('defaultPagination', JSON.stringify(_curPagination));
+                    removeEventHandler();
                 }
             }
+        }
+    };
 
-        });
-        view.on(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, function ($iframe, spineItem) {
-            try {
-                if (spineItem && spineItem.idref && $iframe && $iframe[0]) {
-//                    console.log("\nCONTENT_DOCUMENT_LOADED");
-//                    console.debug(spineItem.href);
-                    ready = true;
-                }
+    function contentLoadedHandler($iframe, spineItem) {
+        try {
+            if (spineItem && spineItem.idref && $iframe && $iframe[0]) {
+                _contentLoaded = true;
             }
-            catch (err) {
-                console.error(err);
-            }
-        });
+        }
+        catch (err) {
+            console.error(err);
+        }
+    };
 
-        curPagination.push({totalPageCount: totalPageCount});
-
-       
-     //   localStorage.setItem('defaultPagination', JSON.stringify(curPagination));
+    function removeEventHandler() {
+        _view.off(ReadiumSDK.Events.PAGINATION_CHANGED);
+        _view.off(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED);
     }
 };

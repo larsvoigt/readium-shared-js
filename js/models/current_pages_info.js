@@ -42,7 +42,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
     this.isFixedLayout = isFixedLayout;
     this.openPages = [];
 
-    var defaultPagination = JSON.parse(localStorage.getItem('defaultPagination'));
+    var _defaultPagination = JSON.parse(localStorage.getItem('defaultPagination'));
 
     this.addOpenPage = function (spineItemPageIndex, spineItemPageCount, idref, spineItemIndex) {
         this.openPages.push({spineItemPageIndex: spineItemPageIndex, spineItemPageCount: spineItemPageCount, idref: idref, spineItemIndex: spineItemIndex});
@@ -105,7 +105,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
         var res = [];
         for (var pageInfo in this.openPages) {
             var pageIndex = this.isFixedLayout ? this.openPages[pageInfo].spineItemIndex
-                : this.openPages[pageInfo].spineItemPageIndex;
+                : getCurrPageNumber(pageInfo);
 
             res.push(pageIndex + 1);
         }
@@ -128,19 +128,60 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
         var firstOpenPage = self.firstOpenPage();
 
-        if (defaultPagination != undefined && defaultPagination.length > 0) {
+        if (_defaultPagination != undefined && _defaultPagination.length > 0) {
 
-            for (var defaultItem in defaultPagination) {
+            var computedTotalPageCount = 0;
+            var ratio = 0;
 
-                if (defaultItem.idref != undefined && defaultItem.idref == firstOpenPage.idref) {
+            for (var i = 0; i < _defaultPagination.length; i++) {
 
-                    console.debug("page factor:" + defaultItem.pageCount / firstOpenPage.spineItemIndex);
+                if (_defaultPagination[i].idref && _defaultPagination[i].idref == firstOpenPage.idref) {
+
+                    ratio = _defaultPagination[i].pageCount / firstOpenPage.spineItemPageCount;
+                    console.debug("default to current ratio: " + ratio);
                 }
 
+                if (_defaultPagination[i].totalPageCount) {
+
+                    computedTotalPageCount = Math.floor(_defaultPagination[i].totalPageCount / ratio);
+//                    computedTotalPageCount = Math.round((_defaultPagination[i].totalPageCount / ratio) * 10) / 10;
+//                    console.debug("total: " + _defaultPagination[i].totalPageCount);
+                }
             }
+            return computedTotalPageCount;
         }
         else
-          return firstOpenPage.spineItemPageCount;
+            return firstOpenPage.spineItemPageCount;
+    }
+
+
+    function getCurrPageNumber(pageInfo) {
+
+        var pageIndex = self.openPages[pageInfo].spineItemPageIndex;
+
+        if (_defaultPagination != undefined && _defaultPagination.length > 0) {
+
+            var computedTotalPageCount = 0;
+            var ratio = 0;
+            var currPageCount = 0;
+
+            for (var i = 0; i < _defaultPagination.length; i++) {
+
+                if (_defaultPagination[i].idref && _defaultPagination[i].idref == self.openPages[pageInfo].idref) {
+
+                    ratio = _defaultPagination[i].pageCount / self.openPages[pageInfo].spineItemPageCount;
+                    console.debug("default to current ratio CurPageNumber: " + ratio);
+                    break;
+                }
+
+                if (_defaultPagination[i].pageCount) {
+                    currPageCount += _defaultPagination[i].pageCount;
+                }
+            }
+//            pageIndex += Math.round((currPageCount / ratio) * 10) / 10;
+            pageIndex += Math.floor(currPageCount / ratio);
+        }
+        return pageIndex;
     }
 
     this.sort = function () {
