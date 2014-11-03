@@ -67,7 +67,6 @@ ReadiumSDK.Views.ReaderView = function(options) {
         console.log("** EL is a string:" + _$el.attr('id'));
     }
 
-
     if(options.iframeLoader) {
         _iframeLoader = options.iframeLoader;
     }
@@ -75,10 +74,21 @@ ReadiumSDK.Views.ReaderView = function(options) {
         _iframeLoader = new ReadiumSDK.Views.IFrameLoader({ mathJaxUrl: options.mathJaxUrl});
     }
 
+
+    _needsFixedLayoutScalerWorkAround = options.needsFixedLayoutScalerWorkAround;
+    this.needsFixedLayoutScalerWorkAround = function() { return _needsFixedLayoutScalerWorkAround; }
+
     this.createViewForType = function(viewType, options) {
         var createdView;
+
+        // NOTE: _$el == options.$viewport
+        _$el.css("overflow", "hidden");
+        
         switch(viewType) {
             case ReadiumSDK.Views.ReaderView.VIEW_TYPE_FIXED:
+
+                _$el.css("overflow", "auto"); // for content pan, see self.setZoom()
+                
                 createdView = new ReadiumSDK.Views.FixedView(options, self);
                 break;
             case ReadiumSDK.Views.ReaderView.VIEW_TYPE_SCROLLED_DOC:
@@ -607,11 +617,6 @@ ReadiumSDK.Views.ReaderView = function(options) {
         }
 
         var pageRequest;
-        var spineItem = _spine.items[pageIndex];
-        if(!spineItem) {
-            return false;
-        }
-
 
         if(_package.isFixedLayout()) {
             var spineItem = _spine.items[pageIndex];

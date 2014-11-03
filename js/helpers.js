@@ -336,7 +336,10 @@ ReadiumSDK.Helpers.loadTemplate = function(name, params) {
 
 ReadiumSDK.Helpers.loadTemplate.cache = {
     "fixed_book_frame" : '<div id="fixed-book-frame" class="clearfix book-frame fixed-book-frame"></div>',
+    
     "single_page_frame" : '<div><div id="scaler"><iframe scrolling="no" class="iframe-fixed"></iframe></div></div>',
+    //"single_page_frame" : '<div><iframe scrolling="no" class="iframe-fixed" id="scaler"></iframe></div>',
+    
     "scrolled_book_frame" : '<div id="reflowable-book-frame" class="clearfix book-frame reflowable-book-frame"><div id="scrolled-content-frame"></div></div>',
     "reflowable_book_frame" : '<div id="reflowable-book-frame" class="clearfix book-frame reflowable-book-frame"></div>',
     "reflowable_book_page_frame": '<div id="reflowable-content-frame" class="reflowable-content-frame"><iframe scrolling="no" id="epubContentIframe"></iframe></div>'
@@ -406,8 +409,23 @@ ReadiumSDK.Helpers.isRenditionSpreadPermittedForItem = function(item, orientatio
         && orientation == ReadiumSDK.Views.ORIENTATION_PORTRAIT );
 };
 
+ReadiumSDK.Helpers.CSSTransition = function($el, trans) {
+    
+    // does not work!
+    //$el.css('transition', trans);
+    
+    var css={};
+    // empty '' prefix FIRST!
+    _.each(['', '-webkit-', '-moz-', '-ms-'], function(prefix) {
+        css[prefix + 'transition'] = prefix + trans;
+    });
+    $el.css(css);
+}
+
 //scale, left, top, angle, origin
 ReadiumSDK.Helpers.CSSTransformString = function(options) {
+    var enable3D = options.enable3D ? true : false;
+    
     var translate, scale, rotation,
         origin = options.origin;
 
@@ -415,13 +433,13 @@ ReadiumSDK.Helpers.CSSTransformString = function(options) {
         var left = options.left || 0, 
             top = options.top || 0;
 
-        translate = "translate(" + left + "px, " + top + "px)";
+        translate = enable3D ? ("translate3D(" + left + "px, " + top + "px, 0)") : ("translate(" + left + "px, " + top + "px)");
     }
     if (options.scale){
-        scale = "scale(" + options.scale + ")";
+        scale = enable3D ? ("scale3D(" + options.scale + ", " + options.scale + ", 0)") : ("scale(" + options.scale + ")");
     }
     if (options.angle){
-        rotation =  "rotate(" + options.angle + "deg)";
+        rotation =  enable3D ? ("rotate3D(0,0," + options.angle + "deg)") : ("rotate(" + options.angle + "deg)");
     }
     
     if (!(translate || scale || rotation)){
@@ -435,13 +453,9 @@ ReadiumSDK.Helpers.CSSTransformString = function(options) {
         //transformString = rotation + " " + transformString;
     }
 
-    //TODO modernizer library can be used to get browser independent transform attributes names (implemented in readium-web fixed_layout_book_zoomer.js)
     var css = {};
-    _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
-        css[prefix + 'transform'] = transformString;
-        css[prefix + 'transform-origin'] = origin ? origin : '0 0';
-    });
-
+    css['transform'] = transformString;
+    css['transform-origin'] = origin ? origin : (enable3D ? '0 0 0' : '0 0');
     return css;
 };
 

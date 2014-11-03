@@ -86,7 +86,7 @@ ReadiumSDK.Views.ReflowableView = function(options, reader){
         _$el = $(template);
         _$viewport.append(_$el);
 
-        var settings = _viewSettings;
+        var settings = reader.viewerSettings();
         if (!settings || typeof settings.enableGPUHardwareAccelerationCSS3D === "undefined")
         {
             //defaults
@@ -202,10 +202,8 @@ ReadiumSDK.Views.ReflowableView = function(options, reader){
     function updateColumnGap() {
 
         if(_$epubHtml) {
-        
-            _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
-                _$epubHtml.css(prefix + "column-gap", _paginationInfo.columnGap + "px");
-            });
+
+            _$epubHtml.css("column-gap", _paginationInfo.columnGap + "px");
         }
     }
 
@@ -292,19 +290,15 @@ ReadiumSDK.Views.ReflowableView = function(options, reader){
         _$epubHtml.css("margin", "0");
         _$epubHtml.css("padding", "0");
 
-        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
-            _$epubHtml.css(prefix + "column-axis", (_htmlBodyIsVerticalWritingMode ? "vertical" : "horizontal"));
-        });
+        _$epubHtml.css("column-axis", (_htmlBodyIsVerticalWritingMode ? "vertical" : "horizontal"));
 
         //
         // /////////
         // //Columns Debugging
         //
-        // _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
-        //     _$epubHtml.css(prefix + "column-rule-color", "red");
-        //     _$epubHtml.css(prefix + "column-rule-style", "dashed");
-        //     _$epubHtml.css(prefix + "column-rule-width", "1px");
-        // });
+        //     _$epubHtml.css("column-rule-color", "red");
+        //     _$epubHtml.css("column-rule-style", "dashed");
+        //     _$epubHtml.css("column-rule-width", "1px");
         // _$epubHtml.css("background-color", '#b0c4de');
         //
         // ////
@@ -630,9 +624,7 @@ ReadiumSDK.Views.ReflowableView = function(options, reader){
 
         _$epubHtml.css("width", (_htmlBodyIsVerticalWritingMode ? _lastViewPortSize.width : _paginationInfo.columnWidth) + "px");
 
-        _.each(['-webkit-', '-moz-', '-ms-', ''], function(prefix) {
-            _$epubHtml.css(prefix + "column-width", _paginationInfo.columnWidth + "px");
-        });
+        _$epubHtml.css("column-width", _paginationInfo.columnWidth + "px");
 
         _$epubHtml.css({left: "0", right: "0", top: "0"});
         
