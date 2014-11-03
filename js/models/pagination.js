@@ -2,6 +2,9 @@ ReadiumSDK.Models.Pagination = function () {
 
     this.storeDefaultPagination = function (openBookData, readerOptions) {
 
+        localStorage.clear();
+        localStorage.removeItem('defaultPagination');
+        
         var view = new ReadiumSDK.Views.ReaderView(readerOptions);
 
         var spine = undefined;
@@ -71,7 +74,7 @@ ReadiumSDK.Models.Pagination = function () {
 
         curPagination.push({totalPageCount: totalPageCount});
 
-        localStorage.removeItem('defaultPagination');
-        localStorage.setItem('defaultPagination', JSON.stringify(curPagination));
+       
+     //   localStorage.setItem('defaultPagination', JSON.stringify(curPagination));
     }
 };

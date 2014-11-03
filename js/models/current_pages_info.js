@@ -128,7 +128,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
         var firstOpenPage = self.firstOpenPage();
 
-        if (defaultPagination.length > 0) {
+        if (defaultPagination != undefined && defaultPagination.length > 0) {
 
             for (var defaultItem in defaultPagination) {
 
