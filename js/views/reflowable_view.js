@@ -226,6 +226,7 @@ ReadiumSDK.Views.ReflowableView = function(options, reader){
         self.trigger(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, _$iframe, _currentSpineItem);
 
         var epubContentDocument = _$iframe[0].contentDocument;
+        console.debug(_$iframe.length);
         _$epubHtml = $("html", epubContentDocument);
         _$htmlBody = $("body", _$epubHtml);
         

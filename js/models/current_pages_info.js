@@ -37,17 +37,17 @@
 ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
     var self = this;
+    var _defaultPagination = JSON.parse(localStorage.getItem('defaultPagination'));
 
     this.isRightToLeft = spine.isRightToLeft();
     this.isFixedLayout = isFixedLayout;
     this.openPages = [];
 
-    var _defaultPagination = JSON.parse(localStorage.getItem('defaultPagination'));
-
     this.addOpenPage = function (spineItemPageIndex, spineItemPageCount, idref, spineItemIndex) {
         this.openPages.push({spineItemPageIndex: spineItemPageIndex, spineItemPageCount: spineItemPageCount, idref: idref, spineItemIndex: spineItemIndex});
 
-        this.sort();
+        sort();
+        ;
     };
 
     this.canGoLeft = function () {
@@ -117,41 +117,42 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
         if (!isOpen()) {
             return 0;
         }
-        return this.isFixedLayout ? spine.items.length : getTotalPageCount();
+        return this.isFixedLayout ? spine.items.length : self.firstOpenPage().spineItemPageCount;
     }
 
     function isOpen() {
         return self.openPages.length > 0;
     }
 
-    function getTotalPageCount() {
+    this.getTotalPageCount = function () {
 
-        var firstOpenPage = self.firstOpenPage();
+        if (this.isFixedLayout) {
 
-        if (_defaultPagination != undefined && _defaultPagination.length > 0) {
+            return spine.items.length;
 
-            var computedTotalPageCount = 0;
-            var ratio = 0;
+        } else {
 
-            for (var i = 0; i < _defaultPagination.length; i++) {
+            var firstOpenPage = self.firstOpenPage();
 
-                if (_defaultPagination[i].idref && _defaultPagination[i].idref == firstOpenPage.idref) {
+            if (_defaultPagination != undefined && _defaultPagination.length > 0) {
 
-                    ratio = _defaultPagination[i].pageCount / firstOpenPage.spineItemPageCount;
-                    console.debug("default to current ratio: " + ratio);
+                var computedTotalPageCount = 0;
+                var ratio = 0;
+
+                for (var i = 0; i < _defaultPagination.length; i++) {
+
+                    if (_defaultPagination[i].idref && _defaultPagination[i].idref == firstOpenPage.idref) {
+
+                        ratio = computeRatio(_defaultPagination[i].pageCount, firstOpenPage.spineItemPageCount);
+                        console.debug("ratio totalPageCount" + ratio);
+                    }
+
+                    if (_defaultPagination[i].totalPageCount)
+                        computedTotalPageCount = Math.floor(_defaultPagination[i].totalPageCount / ratio);
                 }
-
-                if (_defaultPagination[i].totalPageCount) {
-
-                    computedTotalPageCount = Math.floor(_defaultPagination[i].totalPageCount / ratio);
-//                    computedTotalPageCount = Math.round((_defaultPagination[i].totalPageCount / ratio) * 10) / 10;
-//                    console.debug("total: " + _defaultPagination[i].totalPageCount);
-                }
+                return computedTotalPageCount;
             }
-            return computedTotalPageCount;
         }
-        else
-            return firstOpenPage.spineItemPageCount;
     }
 
 
@@ -169,24 +170,27 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
                 if (_defaultPagination[i].idref && _defaultPagination[i].idref == self.openPages[pageInfo].idref) {
 
-                    ratio = _defaultPagination[i].pageCount / self.openPages[pageInfo].spineItemPageCount;
-                    console.debug("default to current ratio CurPageNumber: " + ratio);
+                    ratio = computeRatio(_defaultPagination[i].pageCount, self.openPages[pageInfo].spineItemPageCount);
+                    console.debug("ratio CurPageNumber: " + ratio);
                     break;
                 }
 
-                if (_defaultPagination[i].pageCount) {
+                if (_defaultPagination[i].pageCount)
                     currPageCount += _defaultPagination[i].pageCount;
-                }
             }
-//            pageIndex += Math.round((currPageCount / ratio) * 10) / 10;
             pageIndex += Math.floor(currPageCount / ratio);
         }
         return pageIndex;
     }
 
-    this.sort = function () {
 
-        this.openPages.sort(function (a, b) {
+    function computeRatio(def, curr) {
+        return def / curr;
+    }
+
+    function sort() {
+
+        self.openPages.sort(function (a, b) {
 
             if (a.spineItemIndex != b.spineItemIndex) {
                 return a.spineItemIndex - b.spineItemIndex;
