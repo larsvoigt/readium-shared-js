@@ -44,10 +44,14 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
     this.openPages = [];
 
     this.addOpenPage = function (spineItemPageIndex, spineItemPageCount, idref, spineItemIndex) {
-        this.openPages.push({spineItemPageIndex: spineItemPageIndex, spineItemPageCount: spineItemPageCount, idref: idref, spineItemIndex: spineItemIndex});
 
+        this.openPages.push({
+            spineItemPageIndex: spineItemPageIndex,
+            spineItemPageCount: spineItemPageCount,
+            idref: idref,
+            spineItemIndex: spineItemIndex
+        });
         sort();
-        ;
     };
 
     this.canGoLeft = function () {
@@ -120,10 +124,6 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
         return this.isFixedLayout ? spine.items.length : self.firstOpenPage().spineItemPageCount;
     }
 
-    function isOpen() {
-        return self.openPages.length > 0;
-    }
-
     this.getTotalPageCount = function () {
 
         if (this.isFixedLayout) {
@@ -138,18 +138,19 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
                 var computedTotalPageCount = 0;
                 var ratio = 0;
+                var defaultTotalCount = _defaultPagination[_defaultPagination.length - 1].totalPageCount;
 
                 for (var i = 0; i < _defaultPagination.length; i++) {
 
                     if (_defaultPagination[i].idref && _defaultPagination[i].idref == firstOpenPage.idref) {
 
-                        ratio = computeRatio(_defaultPagination[i].pageCount, firstOpenPage.spineItemPageCount);
-                        console.debug("ratio totalPageCount" + ratio);
+                        ratio = computeRatio(_defaultPagination[i].defaultSpineItemPageCount, firstOpenPage.spineItemPageCount, defaultTotalCount);
+                        console.debug("ratio totalPageCount: " + ratio);
+                        break;
                     }
-
-                    if (_defaultPagination[i].totalPageCount)
-                        computedTotalPageCount = Math.floor(_defaultPagination[i].totalPageCount / ratio);
                 }
+
+                computedTotalPageCount = Math.floor(defaultTotalCount / ratio);
                 return computedTotalPageCount;
             }
         }
@@ -165,27 +166,36 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
             var computedTotalPageCount = 0;
             var ratio = 0;
             var currPageCount = 0;
+            var defaultTotalCount = _defaultPagination[_defaultPagination.length - 1].totalPageCount;
 
             for (var i = 0; i < _defaultPagination.length; i++) {
 
                 if (_defaultPagination[i].idref && _defaultPagination[i].idref == self.openPages[pageInfo].idref) {
 
-                    ratio = computeRatio(_defaultPagination[i].pageCount, self.openPages[pageInfo].spineItemPageCount);
+                    ratio = computeRatio(_defaultPagination[i].defaultSpineItemPageCount, self.openPages[pageInfo].spineItemPageCount, defaultTotalCount);
                     console.debug("ratio CurPageNumber: " + ratio);
                     break;
                 }
 
-                if (_defaultPagination[i].pageCount)
-                    currPageCount += _defaultPagination[i].pageCount;
+                if (_defaultPagination[i].defaultSpineItemPageCount)
+                    currPageCount += _defaultPagination[i].defaultSpineItemPageCount;
             }
             pageIndex += Math.floor(currPageCount / ratio);
         }
         return pageIndex;
     }
 
+    function isOpen() {
+        return self.openPages.length > 0;
+    }
 
-    function computeRatio(def, curr) {
-        return def / curr;
+    function computeRatio(defaultSpineItemPageCount, currSpineItemPageCount, totalPageCount) {
+
+        //console.debug("ratio defaultSpineItemPageCount/ totalPageCount" + (defaultSpineItemPageCount / totalPageCount));
+        var balance = (defaultSpineItemPageCount / totalPageCount);
+        var ratio = (defaultSpineItemPageCount / currSpineItemPageCount)
+
+        return (ratio != 1) ? (ratio + balance) : ratio;
     }
 
     function sort() {

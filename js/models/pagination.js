@@ -39,18 +39,18 @@ ReadiumSDK.Models.Pagination = function (readerView) {
 
             if (openPage) {
 
-                var pageCount = pageChangeData.paginationInfo.getPageCount();
+                var defaultSpineItemPageCount = pageChangeData.paginationInfo.getPageCount();
                 var idref = openPage.idref;
 
                 _curPagination.push({
                     idref: idref,
-                    pageCount: pageCount
+                    defaultSpineItemPageCount: defaultSpineItemPageCount
                 });
 
 //                    console.debug("openpageId: " + idref);
-//                    console.log("page Count: " + pageCount);
+//                    console.log("page Count: " + defaultSpineItemPageCount);
 
-                _totalPageCount += pageCount;
+                _totalPageCount += defaultSpineItemPageCount;
 //                    console.debug("book totalPageCount: " + totalPageCount);
             }
 
@@ -76,7 +76,7 @@ ReadiumSDK.Models.Pagination = function (readerView) {
                     // so it is below necessary to clean up the viewport from
                     // temporary iframe
                     // todo: other options?
-                    $('#epub-reader-frame').children().slice(1).detach();
+                    //$('#epub-reader-frame').children().slice(1).detach();
 
                     _readerView.triggerPaginationChangedEvent();
                 }
