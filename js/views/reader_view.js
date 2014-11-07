@@ -71,7 +71,7 @@ ReadiumSDK.Views.ReaderView = function (options) {
         _iframeLoader = options.iframeLoader;
     }
     else {
-        _iframeLoader = new ReadiumSDK.Views.IFrameLoader({ mathJaxUrl: options.mathJaxUrl});
+        _iframeLoader = new ReadiumSDK.Views.IFrameLoader({mathJaxUrl: options.mathJaxUrl});
     }
 
 
@@ -1055,7 +1055,7 @@ ReadiumSDK.Views.ReaderView = function (options) {
 
     this.triggerPaginationChangedEvent = function () {
 
-        self.trigger(ReadiumSDK.Events.PAGINATION_CHANGED, { paginationInfo: _currentView.getPaginationInfo() });
+        self.trigger(ReadiumSDK.Events.PAGINATION_CHANGED, {paginationInfo: _currentView.getPaginationInfo()});
     }
 
     /**
@@ -1130,6 +1130,10 @@ ReadiumSDK.Views.ReaderView = function (options) {
     this.addIFrameEventListener = function (eventName, callback, context) {
         _iframeLoader.addIFrameEventListener(eventName, callback, context);
     };
+
+    this.getViewPortSize = function () {
+        return _currentView.getViewPortSize();
+    }
 
     var BackgroundAudioTrackManager = function () {
         var _spineItemIframeMap = {};

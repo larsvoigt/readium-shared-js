@@ -9,11 +9,8 @@ ReadiumSDK.Models.Pagination = function (readerView) {
 
     this.storeDefaultPagination = function (openBookData, readerOptions) {
 
-        // Todo: proof book was open don delete defaultPagination
-        localStorage.clear();
+        // Todo: proof book was open than don't delete default pagination
         localStorage.removeItem('defaultPagination');
-
-        readerOptions.el = readerOptions.el;
 
         _view = new ReadiumSDK.Views.ReaderView(readerOptions);
 
@@ -21,7 +18,7 @@ ReadiumSDK.Models.Pagination = function (readerView) {
 
         _view.openBook(openBookData, function (s) {
             // hack to get the spine
-            // view.spine is undefined ???
+            // _view.spine has no spine collection inside, I don't understand why???
             // todo: fixed this issues
             _spine = s;
         });
@@ -47,11 +44,7 @@ ReadiumSDK.Models.Pagination = function (readerView) {
                     defaultSpineItemPageCount: defaultSpineItemPageCount
                 });
 
-//                    console.debug("openpageId: " + idref);
-//                    console.log("page Count: " + defaultSpineItemPageCount);
-
                 _totalPageCount += defaultSpineItemPageCount;
-//                    console.debug("book totalPageCount: " + totalPageCount);
             }
 
             if (_contentLoaded) {
@@ -66,6 +59,7 @@ ReadiumSDK.Models.Pagination = function (readerView) {
 
                 } else {
 
+                    _curPagination.push({defaultViewPortSize: _view.getViewPortSize()});
                     _curPagination.push({totalPageCount: _totalPageCount});
 
                     localStorage.setItem('defaultPagination', JSON.stringify(_curPagination));

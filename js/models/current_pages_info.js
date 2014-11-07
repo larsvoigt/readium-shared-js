@@ -43,13 +43,14 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
     this.isFixedLayout = isFixedLayout;
     this.openPages = [];
 
-    this.addOpenPage = function (spineItemPageIndex, spineItemPageCount, idref, spineItemIndex) {
+    this.addOpenPage = function (spineItemPageIndex, spineItemPageCount, idref, spineItemIndex, viewPortRatio) {
 
         this.openPages.push({
             spineItemPageIndex: spineItemPageIndex,
             spineItemPageCount: spineItemPageCount,
             idref: idref,
-            spineItemIndex: spineItemIndex
+            spineItemIndex: spineItemIndex,
+            viewPortRatio: viewPortRatio
         });
         sort();
     };
@@ -136,22 +137,10 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
             if (_defaultPagination != undefined && _defaultPagination.length > 0) {
 
-                var computedTotalPageCount = 0;
-                var ratio = 0;
                 var defaultTotalCount = _defaultPagination[_defaultPagination.length - 1].totalPageCount;
 
-                for (var i = 0; i < _defaultPagination.length; i++) {
-
-                    if (_defaultPagination[i].idref && _defaultPagination[i].idref == firstOpenPage.idref) {
-
-                        ratio = computeRatio(_defaultPagination[i].defaultSpineItemPageCount, firstOpenPage.spineItemPageCount, defaultTotalCount);
-                        console.debug("ratio totalPageCount: " + ratio);
-                        break;
-                    }
-                }
-
-                computedTotalPageCount = Math.floor(defaultTotalCount / ratio);
-                return computedTotalPageCount;
+                var ratio = getDefaultViewPortRatio() == firstOpenPage.viewPortRatio ? 1 : firstOpenPage.viewPortRatio;
+                return Math.floor(defaultTotalCount / ratio);
             }
         }
     }
@@ -163,19 +152,13 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
         if (_defaultPagination != undefined && _defaultPagination.length > 0) {
 
-            var computedTotalPageCount = 0;
-            var ratio = 0;
             var currPageCount = 0;
-            var defaultTotalCount = _defaultPagination[_defaultPagination.length - 1].totalPageCount;
+            var ratio = getDefaultViewPortRatio() == self.openPages[pageInfo].viewPortRatio ? 1 : self.openPages[pageInfo].viewPortRatio;
 
             for (var i = 0; i < _defaultPagination.length; i++) {
 
-                if (_defaultPagination[i].idref && _defaultPagination[i].idref == self.openPages[pageInfo].idref) {
-
-                    ratio = computeRatio(_defaultPagination[i].defaultSpineItemPageCount, self.openPages[pageInfo].spineItemPageCount, defaultTotalCount);
-                    console.debug("ratio CurPageNumber: " + ratio);
+                if (_defaultPagination[i].idref && _defaultPagination[i].idref == self.openPages[pageInfo].idref)
                     break;
-                }
 
                 if (_defaultPagination[i].defaultSpineItemPageCount)
                     currPageCount += _defaultPagination[i].defaultSpineItemPageCount;
@@ -189,14 +172,28 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
         return self.openPages.length > 0;
     }
 
-    function computeRatio(defaultSpineItemPageCount, currSpineItemPageCount, totalPageCount) {
+    function getDefaultViewPortRatio() {
 
-        //console.debug("ratio defaultSpineItemPageCount/ totalPageCount" + (defaultSpineItemPageCount / totalPageCount));
-        var balance = (defaultSpineItemPageCount / totalPageCount);
-        var ratio = (defaultSpineItemPageCount / currSpineItemPageCount)
-
-        return (ratio != 1) ? (ratio + balance) : ratio;
+        var defaultViewPortSize = _defaultPagination[_defaultPagination.length - 2].defaultViewPortSize;
+        return defaultViewPortSize.height / defaultViewPortSize.width;
     }
+
+    //function computeRatio(defaultSpineItemPageCount, currSpineItemPageCount, totalPageCount) {
+    //
+    //    var balance = (defaultSpineItemPageCount / totalPageCount);
+    //    console.debug("balance: " + balance);
+    //
+    //    var ratio = (defaultSpineItemPageCount / currSpineItemPageCount)
+    //    console.debug("ratio: " + ratio);
+    //
+    //    ratio = ((ratio != 1) ? (ratio + (1 - balance)) : ratio);
+    //
+    //    ratio = Math.round(ratio*100)/100;
+    //
+    //    console.debug("fitted ratio: " + ratio + "\n\n\n");
+    //
+    //    return ratio;
+    //}
 
     function sort() {
 
