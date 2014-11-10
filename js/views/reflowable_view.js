@@ -695,7 +695,7 @@ ReadiumSDK.Views.ReflowableView = function (options, reader) {
         }
 
         var pageIndexes = getOpenPageIndexes();
-        var viewPortRatio = _lastViewPortSize.height / _lastViewPortSize.width;
+        var viewPortRatio = _lastViewPortSize.height * _lastViewPortSize.width;
 
         for (var i = 0, count = pageIndexes.length; i < count; i++) {
 

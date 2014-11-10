@@ -109,10 +109,10 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
         var res = [];
         for (var pageInfo in this.openPages) {
-            var pageIndex = this.isFixedLayout ? this.openPages[pageInfo].spineItemIndex
+            var pageIndex = this.isFixedLayout ? (this.openPages[pageInfo].spineItemIndex+1)
                 : getCurrPageNumber(pageInfo);
 
-            res.push(pageIndex + 1);
+            res.push(pageIndex);
         }
         return res.join("-");
     }
@@ -139,8 +139,8 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
                 var defaultTotalCount = _defaultPagination[_defaultPagination.length - 1].totalPageCount;
 
-                var ratio = getDefaultViewPortRatio() == firstOpenPage.viewPortRatio ? 1 : firstOpenPage.viewPortRatio;
-                return Math.floor(defaultTotalCount / ratio);
+                var ratio = firstOpenPage.viewPortRatio / getDefaultViewPortRatio();
+                return Math.round(defaultTotalCount / ratio);
             }
         }
     }
@@ -148,12 +148,12 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
     function getCurrPageNumber(pageInfo) {
 
-        var pageIndex = self.openPages[pageInfo].spineItemPageIndex;
-
+        var pageIndex = self.openPages[pageInfo].spineItemPageIndex+1;
+        //console.debug("pageindex: " + pageIndex);
         if (_defaultPagination != undefined && _defaultPagination.length > 0) {
 
             var currPageCount = 0;
-            var ratio = getDefaultViewPortRatio() == self.openPages[pageInfo].viewPortRatio ? 1 : self.openPages[pageInfo].viewPortRatio;
+            var ratio = self.openPages[pageInfo].viewPortRatio / getDefaultViewPortRatio();
 
             for (var i = 0; i < _defaultPagination.length; i++) {
 
@@ -163,7 +163,9 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
                 if (_defaultPagination[i].defaultSpineItemPageCount)
                     currPageCount += _defaultPagination[i].defaultSpineItemPageCount;
             }
-            pageIndex += Math.floor(currPageCount / ratio);
+            //console.debug("currPageCount: " + currPageCount + "\n\n");
+            console.debug("raw pageindex: " + ((currPageCount / ratio)+pageIndex));
+            pageIndex += Math.round(currPageCount / ratio);
         }
         return pageIndex;
     }
@@ -175,7 +177,7 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
     function getDefaultViewPortRatio() {
 
         var defaultViewPortSize = _defaultPagination[_defaultPagination.length - 2].defaultViewPortSize;
-        return defaultViewPortSize.height / defaultViewPortSize.width;
+        return defaultViewPortSize.height * defaultViewPortSize.width;
     }
 
     //function computeRatio(defaultSpineItemPageCount, currSpineItemPageCount, totalPageCount) {
