@@ -226,5 +226,4 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
             return a.pageIndex - b.pageIndex;
         });
     };
-
 };
