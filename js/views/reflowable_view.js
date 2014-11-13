@@ -695,7 +695,7 @@ ReadiumSDK.Views.ReflowableView = function (options, reader) {
         }
 
         var pageIndexes = getOpenPageIndexes();
-        var viewPortRatio = _lastViewPortSize.height * _lastViewPortSize.width;
+        var viewPortArea = _lastViewPortSize.height * _lastViewPortSize.width;
 
         for (var i = 0, count = pageIndexes.length; i < count; i++) {
 
@@ -704,7 +704,7 @@ ReadiumSDK.Views.ReflowableView = function (options, reader) {
                 _paginationInfo.columnCount,
                 _currentSpineItem.idref,
                 _currentSpineItem.index,
-                viewPortRatio
+                viewPortArea
             );
         }
 

@@ -5,11 +5,15 @@ ReadiumSDK.Models.Pagination = function (readerView) {
     var _spine = undefined;
     var _contentLoaded = true;
     var _totalPageCount = 0;
-    var _curPagination = [];
+    var _pagination = {
+        defaultSpineItemTotalPageCounts : [],
+        defaultViewPortSize : undefined,
+        totalPageCount : 0
+    };
 
     this.storeDefaultPagination = function (openBookData, readerOptions) {
 
-        // Todo: proof book was open than don't delete default pagination
+        // Todo: proof book was open, than don't delete default pagination
         localStorage.removeItem('defaultPagination');
 
         _view = new ReadiumSDK.Views.ReaderView(readerOptions);
@@ -39,7 +43,7 @@ ReadiumSDK.Models.Pagination = function (readerView) {
                 var defaultSpineItemPageCount = pageChangeData.paginationInfo.getPageCount();
                 var idref = openPage.idref;
 
-                _curPagination.push({
+                _pagination.defaultSpineItemTotalPageCounts.push({
                     idref: idref,
                     defaultSpineItemPageCount: defaultSpineItemPageCount
                 });
@@ -59,10 +63,10 @@ ReadiumSDK.Models.Pagination = function (readerView) {
 
                 } else {
 
-                    _curPagination.push({defaultViewPortSize: _view.getViewPortSize()});
-                    _curPagination.push({totalPageCount: _totalPageCount});
+                    _pagination.defaultViewPortSize = _view.getViewPortSize();
+                    _pagination.totalPageCount = _totalPageCount;
 
-                    localStorage.setItem('defaultPagination', JSON.stringify(_curPagination));
+                    localStorage.setItem('defaultPagination', JSON.stringify(_pagination));
 
                     removeEventHandler();
 
@@ -70,7 +74,7 @@ ReadiumSDK.Models.Pagination = function (readerView) {
                     // so it is below necessary to clean up the viewport from
                     // temporary iframe
                     // todo: other options?
-                    //$('#epub-reader-frame').children().slice(1).detach();
+                    $('#epub-reader-frame').children().slice(1).detach();
 
                     _readerView.triggerPaginationChangedEvent();
                 }
