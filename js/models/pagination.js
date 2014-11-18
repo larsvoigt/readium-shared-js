@@ -83,6 +83,7 @@ ReadiumSDK.Models.Pagination = function (readerView) {
     };
 
     function contentLoadedHandler($iframe, spineItem) {
+        
         try {
             if (spineItem && spineItem.idref && $iframe && $iframe[0]) {
                 _contentLoaded = true;
