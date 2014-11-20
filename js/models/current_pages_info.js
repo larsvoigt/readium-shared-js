@@ -24,17 +24,17 @@
 //  OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*
- Used to report pagination state back to the host application
+Used to report pagination state back to the host application
 
- @class ReadiumSDK.Models.CurrentPagesInfo
+@class ReadiumSDK.Models.CurrentPagesInfo
 
- @constructor
+@constructor
 
- @param {ReadiumSDK.Models.Spine} spine
- @param {boolean} isFixedLayout is fixed or reflowable spine item
- */
+@param {ReadiumSDK.Models.Spine} spine
+@param {boolean} isFixedLayout is fixed or reflowable spine item
+*/
 
-ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
+ReadiumSDK.Models.CurrentPagesInfo = function(spine, isFixedLayout) {
 
     var self = this;
     var _defaultPagination = JSON.parse(localStorage.getItem('defaultPagination'));
@@ -63,9 +63,9 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
         return this.isRightToLeft ? this.canGoPrev() : this.canGoNext();
     };
 
-    this.canGoNext = function () {
+    this.canGoNext = function() {
 
-        if (this.openPages.length == 0)
+        if(this.openPages.length == 0)
             return false;
 
         var lastOpenPage = this.openPages[this.openPages.length - 1];
@@ -81,9 +81,9 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
         return lastOpenPage.spineItemIndex < spine.last().index || lastOpenPage.spineItemPageIndex < lastOpenPage.spineItemPageCount - 1;
     };
 
-    this.canGoPrev = function () {
+    this.canGoPrev = function() {
 
-        if (this.openPages.length == 0)
+        if(this.openPages.length == 0)
             return false;
 
         // TODO: handling of non-linear spine items ("ancillary" documents), allowing page turn within the reflowable XHTML, but preventing previous/next access to sibling spine items. Also needs "go back" feature to navigate to source hyperlink location that led to the non-linear document.
@@ -219,11 +219,14 @@ ReadiumSDK.Models.CurrentPagesInfo = function (spine, isFixedLayout) {
 
         self.openPages.sort(function (a, b) {
 
-            if (a.spineItemIndex != b.spineItemIndex) {
+            if(a.spineItemIndex != b.spineItemIndex) {
                 return a.spineItemIndex - b.spineItemIndex;
             }
 
             return a.pageIndex - b.pageIndex;
+
         });
+
     };
+
 };
